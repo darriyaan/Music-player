@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My music player</title>
+    <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" 
+    integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" 
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./music_styles.css">
+</head>
+<body> 
+    <div class="centre">
+        <div class="music-box">
+            <h3 id="song-name">Mission Impossible</h3>
+            <h3 id="singer">Schifrin</h3>
+            <div class="song-image">
+                <img src="./music-icon.jpg">
+            </div>
+            <audio src="./songs/Mission Impossible Theme.mp3"></audio>
+
+            <!-- progress bar -->
+            <div class="progress_bar" id="progress_bar">
+                <div class="song-timer">
+                    <div id="current-time">0:00</div>
+                    <div id="duration">0:51</div>
+                </div>
+                <div class="progress-div" id="progress-div">
+                    <div class="progress" id="progress"></div>
+                </div>
+            </div>
+
+            <!-- music control buttons -->
+            <div class="music-buttons">
+                <i class="fas fa-backward" id="previous-song" title="previous song"></i>
+                <i class="fas fa-play play-button" id="play"></i>
+                <i class="fas fa-forward" id="next-song" title="next song"></i>
+            </div>
+        </div>
+    </div>
+    <script>
+        const songList = [
+            { name: 'Mission Impossible Theme', title: 'Mission Impossible', artist: 'Schifrin'},
+            { name: 'Game-of-thrones-Violin-theme', title: 'Got Theme - Violin', artist: 'R D'}, 
+            { name: 'thor-ragnarok-theme', title: 'thor-ragnarok', artist: 'Led Zeppelin'}
+        ];
+
+        const music = document.querySelector('audio');
+        const img = document.querySelector('img');
+        const play = document.getElementById('play');
+        let isPlaying = false;
+        //play 
+        const playMusic = () => {
+            isPlaying = true;
+            music.play();
+            play.classList.replace('fa-play', 'fa-pause');
+            img.classList.add('animate');
+        };
+
+        // pause
+        const pauseMusic = () => {
+            isPlaying = false;
+            music.pause();
+            play.classList.replace('fa-pause', 'fa-play');
+            img.classList.remove('animate');
+        };
+
+        play.addEventListener('click', () => isPlaying ? pauseMusic() : playMusic());
+    
+        //song change
+        const singer = document.getElementById('singer');
+        const song_name = document.getElementById('song-name');
+        const loadSong = (song) => {
+            song_name.textContent = song.title;
+            singer.textContent = song.artist;
+            music.src = `./songs/${song.name}.mp3`;
+            // img.src = `images: ${song.name}.jpg`;
+        };
+
+        songNumber = 0; 
+        const nextSong = () => {
+            songNumber = (songNumber + 1) % songList.length;
+            loadSong(songList[songNumber]);
+            playMusic();
+        };   
+        
+        const prevSong = () => {
+            songNumber = (songNumber - 1 + songList.length) % songList.length;
+            loadSong(songList[songNumber]);
+            playMusic();
+        };
+        
+        let progress = document.getElementById('progress');
+        let total_duration = document.getElementById('duration');
+        let time_update = document.getElementById('current-time');
+        music.addEventListener('timeupdate', (event) => {
+            const { currentTime, duration } = event.srcElement;
+            let progress_time = (currentTime / duration) * 100;
+            progress.style.width = `${progress_time}%`;
+        
+            let min_duration = Math.floor(duration / 60) ;
+            let sec_duration = Math.floor(duration % 60) ;
+            if(sec_duration < 10) sec_duration = '0'+ sec_duration;
+            let song_duration = `${min_duration} : ${sec_duration}`;
+            if(duration) {total_duration.textContent = `${song_duration}`;}
+            
+            let min_runTime = Math.floor(currentTime / 60);
+            let sec_runTime = Math.floor(currentTime % 60);
+            if(sec_runTime < 10) sec_runTime = '0'+sec_runTime;
+            let total_runTime = `${min_runTime}:${sec_runTime}`;
+            time_update.textContent = `${ total_runTime }`;
+        });
+
+        const progress_div = document.getElementById('progress-div');
+        progress_div.addEventListener('click', (event) => {
+            const { duration } = music;
+            music.currentTime  = (event.offsetX / event.srcElement.clientWidth) * duration;
+        });
+            
+        music.addEventListener('ended', nextSong);//when current time = song duration
+        const next = document.getElementById('next-song');
+        const previous = document.getElementById('previous-song');
+        previous.addEventListener('click', prevSong);
+        next.addEventListener('click', nextSong);
+    </script>
+</body>
+</html>
